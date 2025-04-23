@@ -20,11 +20,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+        const participantsHTML = details.participants.length > 0
+          ? details.participants.map(participant => `<span>${participant}</span>`).join("")
+          : "No participants yet";
+
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <div class="participants">
+            <strong>Participants:</strong>
+            ${participantsHTML}
+          </div>
         `;
 
         activitiesList.appendChild(activityCard);
@@ -62,6 +70,20 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+
+        // Update participants list for the activity
+        const activityCard = Array.from(activitiesList.children).find((card) =>
+          card.querySelector("h4").textContent === activity
+        );
+
+        if (activityCard) {
+          const participantsDiv = activityCard.querySelector(".participants");
+          const currentParticipants = participantsDiv.innerHTML.replace("<strong>Participants:</strong>", "").split("</span>").map(participant => participant.replace("<span>", "").trim()).filter(Boolean);
+          if (!currentParticipants.includes(email)) {
+            currentParticipants.push(email);
+          }
+          participantsDiv.innerHTML = `<strong>Participants:</strong> ${currentParticipants.map(participant => `<span>${participant}</span>`).join("")}`;
+        }
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
